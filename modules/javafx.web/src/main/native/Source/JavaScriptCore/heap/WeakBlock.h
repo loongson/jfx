@@ -40,8 +40,11 @@ DECLARE_ALLOCATOR_WITH_HEAP_IDENTIFIER(WeakBlock);
 class WeakBlock : public DoublyLinkedListNode<WeakBlock> {
 public:
     friend class WTF::DoublyLinkedListNode<WeakBlock>;
+#if defined(__mips__) || defined(__loongarch__)
+    static constexpr size_t blockSize = 1024; // 1/16 of MarkedBlock size
+#else
     static constexpr size_t blockSize = 256; // 1/16 of MarkedBlock size
-
+#endif
     struct FreeCell {
         FreeCell* next;
     };

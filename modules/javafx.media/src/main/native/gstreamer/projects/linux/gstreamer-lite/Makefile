@@ -41,7 +41,6 @@ CFLAGS =-fPIC                   \
         -Wformat                \
         -Wextra                 \
         -Wformat-security       \
-        -fstack-protector       \
         -Werror=implicit-function-declaration \
         -Werror=trampolines     \
         -D_GNU_SOURCE           \
@@ -53,6 +52,10 @@ CFLAGS =-fPIC                   \
         -DGST_DISABLE_GST_DEBUG \
         -DGST_DISABLE_LOADSAVE  \
         -ffunction-sections -fdata-sections
+
+ifeq (,$(findstring $(ARCH), mips64 loongarch64))
+    CFLAGS += -fstack-protector
+endif
 
 ifeq ($(BUILD_TYPE), Release)
     CFLAGS += -Os
@@ -84,6 +87,11 @@ ifeq ($(ARCH), x32)
     CFLAGS += -m32
     LDFLAGS += -m32
 endif
+
+ifeq ($(ARCH), mips64)
+    LDFLAGS += -Wl,-z,noexecstack
+endif
+
 
 SOURCES = gstreamer/gst/gst.c \
           gstreamer/gst/gstallocator.c \

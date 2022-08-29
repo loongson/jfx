@@ -39,7 +39,11 @@ public:
     static void destroy(HandleBlock*);
     static HandleBlock* blockFor(HandleNode*);
 
+#if defined(__mips__) || defined(__loongarch__)
+    static constexpr size_t blockSize = 16 * KB;
+#else
     static constexpr size_t blockSize = 4 * KB;
+#endif
 
     HandleSet* handleSet();
 

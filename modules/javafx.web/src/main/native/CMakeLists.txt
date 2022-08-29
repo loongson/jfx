@@ -96,6 +96,8 @@ elseif (LOWERCASE_CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
     set(WTF_CPU_ARM 1)
 elseif (LOWERCASE_CMAKE_SYSTEM_PROCESSOR MATCHES "^mips64")
     set(WTF_CPU_MIPS64 1)
+elseif (LOWERCASE_CMAKE_SYSTEM_PROCESSOR MATCHES "^loongarch64")
+    set(WTF_CPU_LOONGARCH64 1)
 elseif (LOWERCASE_CMAKE_SYSTEM_PROCESSOR MATCHES "^mips")
     set(WTF_CPU_MIPS 1)
 elseif (LOWERCASE_CMAKE_SYSTEM_PROCESSOR MATCHES "(x64|x86_64|amd64)")
@@ -172,6 +174,13 @@ option(SHOULD_INSTALL_JS_SHELL "generate an installation rule to install the bui
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+if (WTF_CPU_MIPS64)
+    set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+    set(CMAKE_HAVE_THREADS_LIBRARY 1)
+    set(CMAKE_USE_WIN32_THREADS_INIT 0)
+    set(CMAKE_USE_PTHREADS_INIT 1)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+endif()
 
 # -----------------------------------------------------------------------------
 # Common configuration

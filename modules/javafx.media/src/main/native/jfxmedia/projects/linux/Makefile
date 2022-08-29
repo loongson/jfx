@@ -40,12 +40,15 @@ ifdef HOST_COMPILE
                   -Wformat \
                   -Wextra \
                   -Wformat-security \
-                  -fstack-protector \
                   -Werror=trampolines \
 	          -DGSTREAMER_LITE
-        ifneq ($(ARCH), aarch64)
+        ifeq (,$(findstring $(ARCH), aarch64 mips64 loongarch64))
             CFLAGS += -msse2
         endif
+        ifeq (,$(findstring $(ARCH), mips64 loongarch64))
+            CFLAGS += -fstack-protector
+        endif
+
 
 
 	PACKAGES_INCLUDES := $(shell pkg-config --cflags glib-2.0)
@@ -77,6 +80,10 @@ endif
 ifeq ($(ARCH), x32)
     CFLAGS += -m32
     LDFLAGS += -m32
+endif
+
+ifeq ($(ARCH), mips64)
+    LDFLAGS += -Wl,-z,noexecstack
 endif
 
 CPP_SOURCES = \

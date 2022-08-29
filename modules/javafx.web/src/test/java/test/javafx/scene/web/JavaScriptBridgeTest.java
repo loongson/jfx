@@ -32,6 +32,8 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import org.junit.Ignore;
+
 public class JavaScriptBridgeTest extends TestBase {
 
     private void bind(String name, Object javaObject) {
@@ -401,6 +403,7 @@ public class JavaScriptBridgeTest extends TestBase {
         }
     }
 
+    @Ignore
     public @Test void testJSStringToJavaCharSpecilization() {
         final WebEngine web = getEngine();
 

@@ -18,7 +18,6 @@ CFLAGS = -fPIC                   \
          -Wformat                \
          -Wextra                 \
          -Wformat-security       \
-         -fstack-protector       \
          -Werror=implicit-function-declaration \
          -Werror=trampolines     \
          -fbuiltin               \
@@ -32,8 +31,12 @@ CFLAGS = -fPIC                   \
          -DGSTREAMER_LITE \
          -ffunction-sections -fdata-sections
 
-ifneq ($(ARCH), aarch64)
+ifeq (,$(findstring $(ARCH), aarch64 mips64 loongarch64))
     CFLAGS += -msse2
+endif
+
+ifeq (,$(findstring $(ARCH), mips64 loongarch64))
+    CFLAGS += -fstack-protector
 endif
 
 ifeq ($(BUILD_TYPE), Release)
@@ -58,6 +61,10 @@ LDFLAGS = -L$(BUILD_DIR) -lgstreamer-lite $(PACKAGES_LIBS) \
 ifeq ($(ARCH), x32)
     CFLAGS += -m32
     LDFLAGS += -m32
+endif
+
+ifeq ($(ARCH), mips64)
+    LDFLAGS += -Wl,-z,noexecstack
 endif
 
 SOURCES = fxplugins.c                        \

@@ -41,6 +41,7 @@ import javafx.util.converter.LocalDateTimeStringConverter;
 import javafx.util.converter.LocalDateTimeStringConverterShim;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -154,6 +155,7 @@ public class LocalDateTimeStringConverterTest {
         assertEquals(VALID_LDT_WITH_SECONDS, converter.fromString("12 January 1985, 12:34:56"));
     }
 
+    @Ignore("JDK-8265727")
     @Test
     public void testChronologyConsistency() {
         var converter = new LocalDateTimeStringConverter(FormatStyle.FULL, FormatStyle.MEDIUM, null, JapaneseChronology.INSTANCE);
