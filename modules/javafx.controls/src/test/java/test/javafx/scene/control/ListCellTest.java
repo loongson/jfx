@@ -672,6 +672,17 @@ public class ListCellTest {
         assertTrue(called[0]);
     }
 
+    @Test public void editCellDoesNotFireEventWhileAlreadyEditing() {
+        list.setEditable(true);
+        cell.updateListView(list);
+        cell.updateIndex(2);
+        cell.startEdit();
+        List<EditEvent<?>> events = new ArrayList<>();
+        list.setOnEditStart(events::add);
+        cell.startEdit();
+        assertEquals("startEdit must not fire event while editing", 0, events.size());
+    }
+
     // commitEdit()
     @Test public void commitWhenListIsNullIsOK() {
         cell.updateIndex(1);
@@ -839,6 +850,28 @@ public class ListCellTest {
         assertEquals("removing item must cancel edit on list", -1, list.getEditingIndex());
         assertEquals(1, events.size());
         assertEquals("editing location of cancel event", editingIndex, events.get(0).getIndex());
+    }
+
+    @Test
+    public void testStartEditOffRangeMustNotFireStartEdit() {
+        list.setEditable(true);
+        cell.updateListView(list);
+        cell.updateIndex(list.getItems().size());
+        List<EditEvent<?>> events = new ArrayList<>();
+        list.addEventHandler(ListView.editStartEvent(), events::add);
+        cell.startEdit();
+        assertFalse("sanity: off-range cell must not be editing", cell.isEditing());
+        assertEquals("must not fire editStart", 0, events.size());
+    }
+
+    @Test
+    public void testStartEditOffRangeMustNotUpdateEditingLocation() {
+        list.setEditable(true);
+        cell.updateListView(list);
+        cell.updateIndex(list.getItems().size());
+        cell.startEdit();
+        assertFalse("sanity: off-range cell must not be editing", cell.isEditing());
+        assertEquals("list editing location must not be updated", -1, list.getEditingIndex());
     }
 
 
