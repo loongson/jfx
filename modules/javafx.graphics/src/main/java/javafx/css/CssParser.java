@@ -124,8 +124,8 @@ final public class CssParser {
     // a string and this is that string.
     private String     stylesheetAsText;
 
-    // the url of the stylesheet file, or the docbase of an applet. This will
-    // be null if the source is not a file or from an applet.
+    // the url of the stylesheet file. This will
+    // be null if the source is not a file.
     private String        sourceOfStylesheet;
 
     // the Styleable from the node with an in-line style. This will be null
@@ -814,16 +814,15 @@ final public class CssParser {
             ParsedValueImpl value = parseStrokeType(root);
             if (value == null) error(root, "Expected \'centered', \'inside\' or \'outside\'");
             return value;
-        } else if ("-fx-font-smoothing-type".equals(prop)) {
-            // TODO: Figure out a way that these properties don't need to be
-            // special cased.
+        } else if ("-fx-font-smoothing-type".equals(prop) || "-fx-blend-mode".equals(prop)) {
+            // TODO: Figure out a way that these properties don't need to be special cased.
             String str = null;
             int ttype = -1;
             final Token token = root.token;
 
             if (root.token == null
                     || ((ttype = root.token.getType()) != CssLexer.STRING
-                         && ttype != CssLexer.IDENT)
+                        && ttype != CssLexer.IDENT)
                     || (str = root.token.getText()) == null
                     || str.isEmpty()) {
                 error(root,  "Expected STRING or IDENT");
