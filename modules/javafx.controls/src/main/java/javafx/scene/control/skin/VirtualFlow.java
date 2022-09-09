@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -2072,7 +2072,7 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
      */
     void addLeadingCells(int currentIndex, double startOffset) {
         // The offset will keep track of the distance from the top of the
-        // viewport to the top of the current index. We will increment it
+        // viewport to the top of the current index. We will decrement it
         // as we lay out leading cells.
         double offset = startOffset;
         // The index is the absolute index of the cell being laid out
@@ -2877,6 +2877,10 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
         double p = com.sun.javafx.util.Utils.clamp(0, position, 1);
         double bound = 0d;
         double estSize = estimatedSize / getCellCount();
+        double maxOff = estimatedSize - getViewportLength();
+        if ((maxOff > 0) && (absoluteOffset > maxOff)) {
+            return maxOff - absoluteOffset;
+        }
 
         for (int i = 0; i < getCellCount(); i++) {
             double h = getCellSize(i);
@@ -3069,45 +3073,51 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
         recalculateAndImproveEstimatedSize(DEFAULT_IMPROVEMENT);
     }
 
+    private boolean recalculating = false;
+
     private void recalculateAndImproveEstimatedSize(int improve) {
-        int itemCount = getCellCount();
-        int cacheCount = itemSizeCache.size();
-        boolean keepRatio = ((cacheCount > 0) && !Double.isInfinite(this.absoluteOffset));
-        double estSize = estimatedSize / itemCount;
+        if (recalculating) return;
+        recalculating = true;
+        try {
+            int itemCount = getCellCount();
+            int cacheCount = itemSizeCache.size();
+            boolean keepRatio = ((cacheCount > 0) && !Double.isInfinite(this.absoluteOffset));
 
-        int oldIndex = computeCurrentIndex();
-        double oldOffset = computeViewportOffset(getPosition());
-        int added = 0;
-        while ((itemCount > itemSizeCache.size()) && (added < improve)) {
-            getOrCreateCellSize(itemSizeCache.size());
-            added++;
-        }
-        cacheCount = itemSizeCache.size();
-        int cnt = 0;
-        double tot = 0d;
-        for (int i = 0; (i < itemCount && i < cacheCount); i++) {
-            Double il = itemSizeCache.get(i);
-            if (il != null) {
-                tot = tot + il;
-                cnt++;
+            int oldIndex = computeCurrentIndex();
+            double oldOffset = computeViewportOffset(getPosition());
+            int added = 0;
+            while ((itemCount > itemSizeCache.size()) && (added < improve)) {
+                getOrCreateCellSize(itemSizeCache.size());
+                added++;
             }
-        }
-        this.estimatedSize = cnt == 0 ? 1d : tot * itemCount / cnt;
-        estSize = estimatedSize / itemCount;
-
-        if (keepRatio) {
-            double newOffset = 0;
-            for (int i = 0; i < oldIndex; i++) {
-                double h = getCellSize(i);
-                if (h < 0) {
-                    h = estSize;
+            cacheCount = itemSizeCache.size();
+            int cnt = 0;
+            double tot = 0d;
+            for (int i = 0; (i < itemCount && i < cacheCount); i++) {
+                Double il = itemSizeCache.get(i);
+                if (il != null) {
+                    tot = tot + il;
+                    cnt++;
                 }
-                newOffset += h;
             }
-            this.absoluteOffset = newOffset + oldOffset;
-            adjustPosition();
-        }
+            this.estimatedSize = cnt == 0 ? 1d : tot * itemCount / cnt;
+            double estSize = estimatedSize / itemCount;
 
+            if (keepRatio) {
+                double newOffset = 0;
+                for (int i = 0; i < oldIndex; i++) {
+                    double h = getCellSize(i);
+                    if (h < 0) {
+                        h = estSize;
+                    }
+                    newOffset += h;
+                }
+                this.absoluteOffset = newOffset + oldOffset;
+                adjustPosition();
+            }
+        } finally {
+            recalculating = false;
+        }
     }
 
     private void resetSizeEstimates() {
