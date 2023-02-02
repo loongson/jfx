@@ -71,7 +71,7 @@ ifdef HOST_COMPILE
                   -Wformat-security \
                   -Werror=trampolines \
 	          -DGSTREAMER_LITE
-        ifeq (,$(findstring $(ARCH), aarch64 mips64 loongarch64))
+        ifneq (,$(findstring $(ARCH), x64 x32))
             CFLAGS += -msse2
         endif
         ifeq (,$(findstring $(ARCH), mips64 loongarch64))
